@@ -1,0 +1,5 @@
+.idea
+.ra-aid
+.env
+.DS_Store
+node_modules/
