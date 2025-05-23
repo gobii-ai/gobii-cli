@@ -14,5 +14,9 @@
   "devDependencies": {
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "commander": "^14.0.0",
+    "table": "^6.9.0"
   }
 }
