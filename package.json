@@ -20,5 +20,8 @@
     "commander": "^14.0.0",
     "ora": "^8.2.0",
     "table": "^6.9.0"
+  },
+  "bin": {
+    "gobii-cli": "./dist/index.js"
   }
 }
