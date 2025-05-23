@@ -1,5 +1,5 @@
 import { Config } from '../config';
-import { fetchJson } from './api';
+import { fetchJson, fetchSuccess } from './api';
 
 export async function listAgents() {
   
@@ -14,10 +14,17 @@ export async function listAgents() {
 
 }
 
-export async function getAgentInfo(agentId: string) {
-  return await fetchJson(`agent/${agentId}`, Config.apiKey);
+export async function getAgentTasks(agentId: string) {
+    try {
+        const tasks = await fetchJson(`agents/browser-use/${agentId}/tasks`, Config.apiKey);
+
+        return tasks.results;
+    } catch (error) {
+        console.error('Error getting agent tasks');
+        return [];
+    }
 }
 
 export async function deleteAgent(agentId: string) {
-  return await fetchJson(`agent/${agentId}`, Config.apiKey, { method: 'DELETE' });
+  return await fetchSuccess(`agents/browser-use/${agentId}`, Config.apiKey, { method: 'DELETE' });
 }

@@ -1,5 +1,5 @@
 import { Command, Argument } from 'commander';
-import { listAgents } from './services/agentService';
+import { getAgentTasks, listAgents, deleteAgent } from './services/agentService';
 import { Config } from './config';
 import { table } from 'table';
 import { object } from 'zod';
@@ -35,11 +35,27 @@ const createAgentCommand = (): Command => {
     const agent = new Command('agent');
   
     agent
-      .command('info')
-      .description('Get info on a specific agent')
+      .command('tasks')
+      .description('Get tasks on a specific agent')
       .argument('<agentId>', 'Agent ID')
       .action((agentId) => {
-        console.log(`Showing info for agent: ${agentId}`);
+        getAgentTasks(agentId).then(tasks => {
+            const tasksTable = tasks.map((task: any) => [task.id, task.prompt, task.status, task.created_at, task.updated_at]);
+
+            tasksTable.unshift(['ID', 'Prompt', 'Status', 'Created At', 'Updated At']);
+
+            console.log(table(tasksTable, {
+                columns: {
+                    0: { alignment: 'left' },
+                    1: { alignment: 'left', wrapWord: true },
+                    2: { alignment: 'left' },
+                    3: { alignment: 'left' },
+                    4: { alignment: 'left' },
+                }
+            }));
+
+            console.log("Total tasks: ", tasks.length);
+        });
       });
   
     agent
@@ -47,7 +63,13 @@ const createAgentCommand = (): Command => {
       .description('Delete a specific agent')
       .argument('<agentId>', 'Agent ID')
       .action((agentId) => {
-        console.log(`Deleting agent: ${agentId}`);
+        deleteAgent(agentId).then(delAgent => {
+            if (delAgent) {
+                console.log('Agent deleted successfully');
+            } else {
+                console.error('Failed to delete agent');
+            }
+        });
       });
   
     return agent;
