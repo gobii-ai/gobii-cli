@@ -1,6 +1,6 @@
 # Gobii CLI Tool
 
-Unofficial [Gobii](https://www.getgobii.com) CLI tool
+Unofficial [Gobii](https://getgobii.com) CLI tool
 
 This is very early in development and *will* have bugs. Right now, the only supported commands is `agents list`
 
