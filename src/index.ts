@@ -2,7 +2,7 @@ import { Command, Argument } from 'commander';
 import { getAgentTasks, listAgents, deleteAgent, promptAgent } from './services/agentService';
 import { Config } from './config';
 import { table } from 'table';
-import cliSpinners from 'cli-spinners';
+import {randomSpinner} from 'cli-spinners';
 import ora from 'ora';
 
 const createAgentsCommand = (): Command => {
@@ -83,7 +83,7 @@ const createPromptCommand = (): Command => {
   .action(async (text) => {
     const spinner = ora({
       text: 'Executing prompt, this may take a while...',
-      spinner: cliSpinners.binary, // Custom spinner animation
+      spinner: randomSpinner(), // Custom spinner animation
     }).start();
     
     try {
