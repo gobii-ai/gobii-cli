@@ -1,21 +1,24 @@
+import { logError, logVerbose } from "../util/logger";
+
 export async function debugFetch(
   url: string,
   options: RequestInit = {}
 ): Promise<any> {
-  console.log('--- FETCH DEBUG ---');
-  console.log('URL:', url);
-  console.log('Method:', options.method || 'GET');
-  console.log('Headers:', options.headers);
+  logVerbose('--- FETCH DEBUG ---');
+  logVerbose('URL:', url);
+  logVerbose('Method:', options.method || 'GET');
+  logVerbose('Headers:', options.headers);
+
   if (options.body) {
-    console.log('Body:', typeof options.body === 'string' ? options.body : '[non-string body]');
+    logVerbose('Body:', typeof options.body === 'string' ? options.body : '[non-string body]');
   }
 
   const response = await fetch(url, options);
 
-  console.log('Status:', response.status, response.statusText);
-  console.log('Response Headers:');
+  logVerbose('Status:', response.status, response.statusText);
+  logVerbose('Response Headers:');
   response.headers.forEach((value: string, key: string) => {
-    console.log(`  ${key}: ${value}`);
+    logVerbose(`  ${key}: ${value}`);
   });
 
   const contentType = response.headers.get('content-type') || '';
@@ -24,19 +27,16 @@ export async function debugFetch(
 
   if (contentType.includes('application/json')) {
     body = await response.clone().json();
-    console.log('Response JSON:', body);
+    logVerbose('Response JSON:', body);
   } else {
     body = await response.clone().text();
-    console.log('Response Text:', body);
+    logVerbose('Response Text:', body);
   }
 
-  console.log('--- END FETCH DEBUG ---');
+  logVerbose('--- END FETCH DEBUG ---');
 
   return response;
 }
-
-
-
 
 /**
  * Base fetch function
@@ -54,7 +54,7 @@ async function baseFetch(
   ): Promise<any> {
     const url = `https://getgobii.com/api/v1/${endpoint}`
 
-    console.log('Fetching: ', url);
+    logVerbose('Fetching: ', url);
 
     const response = await fetch(url, {
       ...options,
@@ -87,11 +87,6 @@ async function basePost(
   options: RequestInit = {}
 ): Promise<any> {
   const url = `https://getgobii.com/api/v1/${endpoint}`
-
-    console.log('Fetching: ', url);
-    console.log('Options: ', options);
-
-
     const response = await debugFetch(url, {
       ...options,
       method: 'POST',
@@ -140,8 +135,6 @@ export async function fetchJson(endpoint: string, apiKey: string, options: Reque
 export async function postJson(endpoint: string, apiKey: string, options: RequestInit = {}) {
     const response = await basePost(endpoint, apiKey, options);
 
-    console.log('Response: ', JSON.stringify(response, null, 2));
-
     return response.json();
 }
 
@@ -163,6 +156,8 @@ export async function fetchSuccess(endpoint: string, apiKey: string, options: Re
         }
     } catch (error) {
         //TODO: Log the error
+        logError('Error fetching: ', endpoint);
+        logError(error);
     }
 
     return false;

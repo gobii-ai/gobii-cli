@@ -4,6 +4,8 @@ import { Config } from './config';
 import { table } from 'table';
 import {randomSpinner} from 'cli-spinners';
 import ora from 'ora';
+import { enableVerbose } from './util/logger';
+
 
 const createAgentsCommand = (): Command => {
     const agents = new Command('agents');
@@ -111,6 +113,7 @@ program
     .version('1.0.0')
     .name('gobii-cli')
     .option('-a, --api-key <apiKey>', 'API key')
+    .option('-v, --verbose', 'Enable verbose logging');
 
 program.addCommand(createAgentsCommand());
 program.addCommand(createAgentCommand());
@@ -127,6 +130,12 @@ program.hook('preAction', (thisCommand) => {
     } else {
       console.error('API Key must be set via --api-key or GOBII_API_KEY environment variable');
       process.exit(1);
+    }
+  });
+
+  program.hook('preAction', (thisCommand) => {
+    if (thisCommand.opts().verbose) {
+      enableVerbose();
     }
   });
   
