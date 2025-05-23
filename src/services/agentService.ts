@@ -1,5 +1,5 @@
 import { Config } from '../config';
-import { fetchJson, fetchSuccess } from './api';
+import { fetchJson, fetchSuccess, postJson } from './api';
 
 export async function listAgents() {
   
@@ -27,4 +27,20 @@ export async function getAgentTasks(agentId: string) {
 
 export async function deleteAgent(agentId: string) {
   return await fetchSuccess(`agents/browser-use/${agentId}`, Config.apiKey, { method: 'DELETE' });
+}
+
+/**
+ * Prompt to execute a task - all the agent and task magic happens automatically
+ * 
+ * @param {string} prompt - The prompt to send to the agent
+ * @param {number} wait - The number of seconds to wait for the agent to complete the task
+ * @returns {Promise<any>} - The response from the agent
+ */
+export async function promptAgent(prompt: string, wait: number = 600) {
+  return await postJson(`tasks/browser-use/`, Config.apiKey, {
+    body: JSON.stringify({ 
+        prompt: prompt,
+        wait: wait
+     }),
+  });
 }

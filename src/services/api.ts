@@ -1,3 +1,43 @@
+export async function debugFetch(
+  url: string,
+  options: RequestInit = {}
+): Promise<any> {
+  console.log('--- FETCH DEBUG ---');
+  console.log('URL:', url);
+  console.log('Method:', options.method || 'GET');
+  console.log('Headers:', options.headers);
+  if (options.body) {
+    console.log('Body:', typeof options.body === 'string' ? options.body : '[non-string body]');
+  }
+
+  const response = await fetch(url, options);
+
+  console.log('Status:', response.status, response.statusText);
+  console.log('Response Headers:');
+  response.headers.forEach((value: string, key: string) => {
+    console.log(`  ${key}: ${value}`);
+  });
+
+  const contentType = response.headers.get('content-type') || '';
+
+  let body;
+
+  if (contentType.includes('application/json')) {
+    body = await response.clone().json();
+    console.log('Response JSON:', body);
+  } else {
+    body = await response.clone().text();
+    console.log('Response Text:', body);
+  }
+
+  console.log('--- END FETCH DEBUG ---');
+
+  return response;
+}
+
+
+
+
 /**
  * Base fetch function
  * 
@@ -16,7 +56,6 @@ async function baseFetch(
 
     console.log('Fetching: ', url);
 
-
     const response = await fetch(url, {
       ...options,
       headers: {
@@ -33,6 +72,47 @@ async function baseFetch(
     return response;
   }
   
+  /**
+   * Base POST fetch function
+   * 
+   * @param endpoint - The endpoint to fetch
+   * @param apiKey - The API key to use
+   * @param options - The options to pass to the fetch request; body is required and a string. This expects any prep to already be done, ex: JSON.stringify({})
+   * 
+   * @returns The response object
+   */
+async function basePost(
+  endpoint: string,
+  apiKey: string,
+  options: RequestInit = {}
+): Promise<any> {
+  const url = `https://getgobii.com/api/v1/${endpoint}`
+
+    console.log('Fetching: ', url);
+    console.log('Options: ', options);
+
+
+    const response = await debugFetch(url, {
+      ...options,
+      method: 'POST',
+      headers: {
+        'X-Api-Key': apiKey,
+        'Content-Type': 'application/json',
+        ...(options.headers || {}),
+      },
+      body: options.body,
+    });
+  
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+    }
+
+    console.log('Response: ', JSON.stringify(response, null, 2));
+  
+    return response;
+}
+
+
 /**
  * Fetch a resource and return the JSON response
  * 
@@ -44,6 +124,23 @@ async function baseFetch(
  */
 export async function fetchJson(endpoint: string, apiKey: string, options: RequestInit = {}) {
     const response = await baseFetch(endpoint, apiKey, options);
+
+    return response.json();
+}
+
+/**
+ * Post a resource and return the JSON response
+ * 
+ * @param endpoint - The endpoint to fetch
+ * @param apiKey - The API key to use
+ * @param options - The options to pass to the fetch request
+ * 
+ * @returns The JSON response
+ */
+export async function postJson(endpoint: string, apiKey: string, options: RequestInit = {}) {
+    const response = await basePost(endpoint, apiKey, options);
+
+    console.log('Response: ', JSON.stringify(response, null, 2));
 
     return response.json();
 }
@@ -67,8 +164,6 @@ export async function fetchSuccess(endpoint: string, apiKey: string, options: Re
     } catch (error) {
         //TODO: Log the error
     }
-
-
 
     return false;
 }

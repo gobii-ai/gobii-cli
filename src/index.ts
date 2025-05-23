@@ -1,8 +1,9 @@
 import { Command, Argument } from 'commander';
-import { getAgentTasks, listAgents, deleteAgent } from './services/agentService';
+import { getAgentTasks, listAgents, deleteAgent, promptAgent } from './services/agentService';
 import { Config } from './config';
 import { table } from 'table';
-import { object } from 'zod';
+import cliSpinners from 'cli-spinners';
+import ora from 'ora';
 
 const createAgentsCommand = (): Command => {
     const agents = new Command('agents');
@@ -75,26 +76,58 @@ const createAgentCommand = (): Command => {
     return agent;
   }
 
+const createPromptCommand = (): Command => {
+  const prompt = new Command('prompt')
+  .argument('<text>', 'Prompt text to create a new task')
+  .description("Create a new task with a provided prompt")
+  .action(async (text) => {
+    const spinner = ora({
+      text: 'Executing prompt, this may take a while...',
+      spinner: cliSpinners.binary, // Custom spinner animation
+    }).start();
+    
+    try {
+      promptAgent(text, 600).then(result => {
+        spinner.succeed('Prompt completed successfully!');
+        console.log("Result:");
+        console.log(result.result);
+      }).catch(error => {
+        spinner.fail('Failed to execute prompt');
+        console.error(error);
+      });
+      
+    } catch (error) {
+      spinner.fail('Failed to send prompt');
+      console.error(error);
+    }
+  });
+
+    return prompt;
+  }
+
 const program = new Command();
 
 program
     .version('1.0.0')
     .name('gobii-cli')
-    .requiredOption('-a, --api-key <apiKey>', 'API key');
+    .option('-a, --api-key <apiKey>', 'API key')
 
 program.addCommand(createAgentsCommand());
 program.addCommand(createAgentCommand());
+program.addCommand(createPromptCommand());
     
+
+//Validate we have an API key
 program.hook('preAction', (thisCommand) => {
     const opts = thisCommand.opts();
     if (opts.apiKey) {
       Config.apiKey = opts.apiKey;
+    } else if (process.env.GOBII_API_KEY) {
+        Config.apiKey = process.env.GOBII_API_KEY;
     } else {
-      console.error('Missing required --api-key');
+      console.error('API Key must be set via --api-key or GOBII_API_KEY environment variable');
       process.exit(1);
     }
   });
   
 program.parseAsync(process.argv);
-
-
