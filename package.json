@@ -16,7 +16,9 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
+    "cli-spinners": "^3.2.0",
     "commander": "^14.0.0",
+    "ora": "^8.2.0",
     "table": "^6.9.0"
   }
 }
