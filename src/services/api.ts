@@ -80,7 +80,7 @@ async function baseFetch(
       },
     });
   
-    if (!response.ok) {
+    if (!response?.ok) {
       throw new Error(`HTTP ${response.status}: ${await response.text()}`);
     } else {
       logVerbose('Response OK');
@@ -116,7 +116,7 @@ async function basePost(
     body: options.body,
   });
 
-  if (!response.ok) {
+  if (!response?.ok) {
     throw new Error(`HTTP ${response.status}: ${await response.text()}`);
   }
 
@@ -169,11 +169,10 @@ export async function fetchSuccess(endpoint: string, apiKey: string, options: Re
     try {
         const response = await baseFetch(endpoint, apiKey, options);
 
-        if (response.ok) {
+        if (response?.ok) {
             return true;
         }
     } catch (error) {
-        //TODO: Log the error
         logError('Error fetching: ', endpoint);
         logError(error);
     }
