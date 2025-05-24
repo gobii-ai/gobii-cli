@@ -3,6 +3,11 @@ import { setExitCode } from '../util/exit';
 import { logError } from '../util/logger';
 import { fetchJson, fetchSuccess, postJson } from './api';
 
+/**
+ * List all agents
+ * 
+ * @returns {Promise<any>} - The response from the agent
+ */
 export async function listAgents() {
   try {
     const agents = await fetchJson('agents/browser-use', Config.apiKey);
@@ -15,6 +20,12 @@ export async function listAgents() {
   }
 }
 
+/**
+ * Get the tasks for an agent
+ * 
+ * @param {string} agentId - The ID of the agent
+ * @returns {Promise<any>} - The response from the agent
+ */
 export async function getAgentTasks(agentId: string) {
   try {
     const tasks = await fetchJson(`agents/browser-use/${agentId}/tasks`, Config.apiKey);
@@ -27,6 +38,12 @@ export async function getAgentTasks(agentId: string) {
   }
 }
 
+/**
+ * Delete an agent
+ * 
+ * @param {string} agentId - The ID of the agent
+ * @returns {Promise<any>} - The response from the agent
+ */
 export async function deleteAgent(agentId: string) {
   return await fetchSuccess(`agents/browser-use/${agentId}`, Config.apiKey, { method: 'DELETE' });
 }

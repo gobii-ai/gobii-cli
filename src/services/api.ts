@@ -1,5 +1,13 @@
 import { logError, logVerbose } from "../util/logger";
 
+/**
+ * A wrapper for `fetch` that logs the request and response. 
+ * 
+ * @param {string} url - The URL to fetch
+ * @param {RequestInit} options - The options to pass to the fetch request
+ * 
+ * @returns {Promise<Response>} - The response from the fetch request
+ */
 export async function debugFetch(
   url: string,
   options: RequestInit = {}

@@ -9,6 +9,11 @@ import ora from 'ora';
 import { log, logError, logResult, setLoggingOptions, isSilent } from './util/logger';
 import { getExitCode, setExitCode } from './util/exit';
 
+/**
+ * Create the agents command
+ * 
+ * @returns {Command} - The command
+ */
 const createAgentsCommand = (): Command => {
   const agents = new Command('agents');
 
@@ -48,6 +53,11 @@ const createAgentsCommand = (): Command => {
   return agents;
 }
 
+/**
+ * Create the agent command
+ * 
+ * @returns {Command} - The command
+ */
 const createAgentCommand = (): Command => {
   const agent = new Command('agent');
 
@@ -116,6 +126,11 @@ const createAgentCommand = (): Command => {
   return agent;
 };
 
+/**
+ * Create the prompt command
+ * 
+ * @returns {Command} - The command
+ */
 const createPromptCommand = (): Command => {
   const prompt = new Command('prompt')
     .argument('<text>', 'Prompt text to create a new task')
@@ -190,6 +205,7 @@ process.on('unhandledRejection', (reason) => {
   logError('💥 Unhandled Rejection:', reason);
   process.exit(1);
 });
+
 
 async function main() {
   try {
