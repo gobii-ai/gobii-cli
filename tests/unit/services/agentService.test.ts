@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import * as api from '../../../src/services/api';
 import * as agentService from '../../../src/services/agentService';
-import { setExitCode, getExitCode, __resetExitCodeForTests } from '../../../src/util/exit';
+import { setExitCode, getExitCode, resetExitCodeForTests } from '../../../src/util/exit';
 
 vi.mock('../../../src/services/api', async () => {
   const actual = await vi.importActual<typeof import('../../../src/services/api')>('../../../src/services/api');
@@ -16,7 +16,7 @@ vi.mock('../../../src/services/api', async () => {
 describe('agentService.ts', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    __resetExitCodeForTests();
+    resetExitCodeForTests();
   });
 
   it('listAgents should return agent results', async () => {

@@ -10,13 +10,15 @@
     "postbuild": "chmod +x dist/index.js",
     "test": "vitest",
     "test:watch": "vitest --watch",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "test:cli": "vitest run tests/cli"
   },
   "author": "Will Bonde",
   "license": "Apache-2.0",
   "description": "",
   "devDependencies": {
     "@changesets/cli": "^2.29.4",
+    "execa": "^9.5.3",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3",
     "vitest": "^3.1.4"

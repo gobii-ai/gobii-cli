@@ -7,7 +7,7 @@ import { table } from 'table';
 import { randomSpinner } from 'cli-spinners';
 import ora from 'ora';
 import { log, logError, logResult, setLoggingOptions, isSilent, setSilent } from './util/logger';
-import { getExitCode, setExitCode } from './util/exit';
+import { getExitCode, resetExitCodeForTests, setExitCode } from './util/exit';
 import { getOutputType, GobiiCliOutputType, setOutputConfig } from './util/output';
 
 /**
@@ -291,6 +291,9 @@ process.on('unhandledRejection', (reason) => {
 
 
 async function main() {
+  //This is a workaround for testing; this should never be called outside of tests, OR right here.
+  resetExitCodeForTests();
+
   try {
     await program.parseAsync(process.argv);
   } catch (err) {

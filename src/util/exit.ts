@@ -31,8 +31,6 @@ export function getExitCode(): number {
  * 
  * @returns {void}
  */
-export function __resetExitCodeForTests() {
-  if (process.env.NODE_ENV === 'test') {
-    exitCode = 0;
-  }
+export function resetExitCodeForTests() {
+  exitCode = 0;
 }
