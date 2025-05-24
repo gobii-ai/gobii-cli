@@ -6,8 +6,8 @@ import { Config } from './config';
 import { table } from 'table';
 import {randomSpinner} from 'cli-spinners';
 import ora from 'ora';
-import { enableVerbose } from './util/logger';
-
+import { log, logError, logResult, setLoggingOptions, isSilent } from './util/logger';
+import { getExitCode, setExitCode } from './util/exit';
 
 const createAgentsCommand = (): Command => {
     const agents = new Command('agents');
@@ -23,13 +23,16 @@ const createAgentsCommand = (): Command => {
                 //Push the headers to the first row
                 agentsTable.unshift(['ID', 'Name', 'Created At']);
 
-                console.log(table(agentsTable, {
+                logResult(table(agentsTable, {
                     columns: {
                         0: { alignment: 'left' },
                         1: { alignment: 'left' },
                         2: { alignment: 'left' },
                     }
                 }));
+            }).catch(error => {
+              logError("Failed to get agents");
+              setExitCode(1);
             });
         });
 
@@ -49,7 +52,7 @@ const createAgentCommand = (): Command => {
 
             tasksTable.unshift(['ID', 'Prompt', 'Status', 'Created At', 'Updated At']);
 
-            console.log(table(tasksTable, {
+            logResult(table(tasksTable, {
                 columns: {
                     0: { alignment: 'left' },
                     1: { alignment: 'left', wrapWord: true },
@@ -59,7 +62,10 @@ const createAgentCommand = (): Command => {
                 }
             }));
 
-            console.log("Total tasks: ", tasks.length);
+            log("Total tasks: ", tasks.length);
+        }).catch(error => {
+          logError("Failed to get tasks");
+          setExitCode(1);
         });
       });
   
@@ -70,9 +76,10 @@ const createAgentCommand = (): Command => {
       .action((agentId) => {
         deleteAgent(agentId).then(delAgent => {
             if (delAgent) {
-                console.log('Agent deleted successfully');
+              log('Agent deleted successfully');
             } else {
-                console.error('Failed to delete agent');
+              logError('Failed to delete agent');
+              setExitCode(1);
             }
         });
       });
@@ -88,26 +95,42 @@ const createPromptCommand = (): Command => {
     const spinner = ora({
       text: 'Executing prompt, this may take a while...',
       spinner: randomSpinner(), // Custom spinner animation
-    }).start();
+    })
     
+    if (!isSilent()) {
+      spinner.start();
+    }
+
     try {
-      promptAgent(text, 600).then(result => {
-        spinner.succeed('Prompt completed successfully!');
-        console.log("Result:");
-        console.log(result.result);
-      }).catch(error => {
-        spinner.fail('Failed to execute prompt');
-        console.error(error);
-      });
-      
+      promptAgent(text, 600)
+        .then(result => {
+          if (!isSilent()) {
+            spinner.succeed('Prompt completed successfully!');
+          }
+
+          log("Result:");
+          logResult(result.result);
+        })
+        .catch(error => {
+          if (!isSilent()) {
+            spinner.fail('Failed to execute prompt');
+          }
+
+          logError(error);
+          setExitCode(1);
+        });
     } catch (error) {
-      spinner.fail('Failed to send prompt');
-      console.error(error);
+      if (!isSilent()) {
+        spinner.fail('Failed to send prompt');
+      }
+
+      logError(error);
+      setExitCode(1);
     }
   });
 
-    return prompt;
-  }
+  return prompt;
+}
 
 const program = new Command();
 
@@ -115,7 +138,8 @@ program
     .version('1.0.0')
     .name('gobii-cli')
     .option('-a, --api-key <apiKey>', 'API key')
-    .option('-v, --verbose', 'Enable verbose logging');
+    .option('-v, --verbose', 'Enable verbose logging')
+    .option('-s, --silent', 'Suppress all output except final result. Verbose mode takes precedence over silent mode.');
 
 program.addCommand(createAgentsCommand());
 program.addCommand(createAgentCommand());
@@ -135,10 +159,17 @@ program.hook('preAction', (thisCommand) => {
     }
   });
 
-  program.hook('preAction', (thisCommand) => {
-    if (thisCommand.opts().verbose) {
-      enableVerbose();
-    }
-  });
+program.hook('preAction', (thisCommand) => {
+  const opts = thisCommand.opts();
+  setLoggingOptions({ verbose: opts.verbose, silent: opts.silent });
+});
   
-program.parseAsync(process.argv);
+program
+  .parseAsync(process.argv)
+  .then(() => {
+    process.exit(getExitCode());
+  })
+  .catch(error => {
+    logError(error);
+    setExitCode(1);
+  });
