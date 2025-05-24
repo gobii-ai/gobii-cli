@@ -25,3 +25,14 @@ export function setExitCode(code: number) {
 export function getExitCode(): number {
   return exitCode;
 }
+
+/**
+ * Reset the exit code for tests. This is a workaround to allow tests to reset the exit code.
+ * 
+ * @returns {void}
+ */
+export function __resetExitCodeForTests() {
+  if (process.env.NODE_ENV === 'test') {
+    exitCode = 0;
+  }
+}
