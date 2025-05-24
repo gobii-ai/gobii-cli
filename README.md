@@ -108,4 +108,8 @@ npm install
 npm run dev -- <command>
 ```
 
-License: Apache-2.0
+This project is licensed under the [Apache License 2.0](LICENSE).
+
+No warranties, express or implied.
+
+Copyright © 2025 Will Bonde.
