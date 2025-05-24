@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { Command, Argument } from 'commander';
-import { getAgentTasks, listAgents, deleteAgent, promptAgent } from './services/agentService';
+import { getAgentTasks, listAgents, deleteAgent, promptAgent, getAgentTask } from './services/agentService';
 import { Config } from './config';
 import { table } from 'table';
 import { randomSpinner } from 'cli-spinners';
@@ -145,6 +145,42 @@ const createAgentCommand = (): Command => {
   return agent;
 };
 
+const createAgentTaskCommand = (): Command => {
+  const agentTask = new Command('task');
+
+  agentTask.description('Manage an individual agent task');
+
+  agentTask
+    .command('get')
+    .description('Get a specific task on an agent')
+    .argument('<taskId>', 'Task ID')
+    .action(async (taskId: string) => {
+      try {
+        const task = await getAgentTask(taskId);
+
+        if (getOutputType() === GobiiCliOutputType.JSON) {
+          logResult(JSON.stringify(task, null, 2));
+        } else {
+          logResult('Task: ' + taskId);
+          logResult('Prompt: ' + task.prompt);
+          logResult('Status: ' + task.status);
+          logResult('Agent: ' + task.agent);
+          logResult('Agent ID: ' + task.agentId);
+          logResult('Output Schema: ' + task.output_schema);
+          logResult('Created At: ' + task.created_at);
+          logResult('Updated At: ' + task.updated_at);
+          logResult('Error Message: ' + task.error_message);
+        }
+      } catch (err) {
+        logError('Failed to get task');
+        logError(err);
+        setExitCode(1);
+      }
+    });
+
+  return agentTask;
+};
+
 /**
  * Create the prompt command
  * 
@@ -209,6 +245,7 @@ program
 program.addCommand(createPromptCommand());
 program.addCommand(createAgentsCommand());
 program.addCommand(createAgentCommand());
+program.addCommand(createAgentTaskCommand());
 
 //Validate we have an API key
 program.hook('preAction', (thisCommand) => {

@@ -39,6 +39,16 @@ export async function getAgentTasks(agentId: string) {
 }
 
 /**
+ * Get a specific task on an agent
+ * 
+ * @param {string} taskId - The ID of the task
+ * @returns {Promise<any>} - The response from the agent
+ */
+export async function getAgentTask(taskId: string) {
+  return await fetchJson(`tasks/browser-use/${taskId}`, Config.apiKey);
+}
+
+/**
  * Delete an agent
  * 
  * @param {string} agentId - The ID of the agent
