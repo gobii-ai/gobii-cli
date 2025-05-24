@@ -1,14 +1,16 @@
 import { Config } from '../config';
+import { setExitCode } from '../util/exit';
+import { logError } from '../util/logger';
 import { fetchJson, fetchSuccess, postJson } from './api';
 
 export async function listAgents() {
-  
     try {
         const agents = await fetchJson('agents/browser-use', Config.apiKey);
 
         return agents.results;
     } catch (error) {
-        console.error('Error listing agents');
+        logError('Error listing agents');
+        setExitCode(1);
         return 
     }
 
@@ -20,7 +22,8 @@ export async function getAgentTasks(agentId: string) {
 
         return tasks.results;
     } catch (error) {
-        console.error('Error getting agent tasks');
+        logError('Error getting agent tasks');
+        setExitCode(1);
         return [];
     }
 }
