@@ -19,6 +19,20 @@
       "console": "integratedTerminal"
     },
     {
+      "name": "JSON - Agent List",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/index.ts",
+      "args": ["agents", "list", "--api-key", "${env:GOBII_API_KEY}", "--format", "json"],
+      "cwd": "${workspaceFolder}",
+      "runtimeArgs": ["-r", "ts-node/register"],
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "skipFiles": ["<node_internals>/**"],
+      "console": "integratedTerminal"
+    },
+    {
       "name": "Agent Tasks (Verbose)",
       "type": "node",
       "request": "launch",
@@ -57,6 +71,20 @@
       "cwd": "${workspaceFolder}",
       "runtimeArgs": ["-r", "ts-node/register"],
       "console": "integratedTerminal",
-    }
+    },
+    {
+      "name": "JSON - Prompt Agent Weather",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/index.ts",
+      "args": ["prompt", "What is the weather in Washington, DC?", "--api-key", "${env:GOBII_API_KEY}", "--format", "json"],
+      "cwd": "${workspaceFolder}",
+      "runtimeArgs": ["-r", "ts-node/register"],
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "skipFiles": ["<node_internals>/**"],
+      "console": "integratedTerminal"
+    },
   ]
 }
