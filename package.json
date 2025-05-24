@@ -1,8 +1,9 @@
 {
   "name": "gobii-cli",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
+    "clean": "rm -rf dist && find src -name '*.js' -delete && find src -name '*.js.map' -delete",
     "build": "tsc",
     "start": "node dist/index.js",
     "dev": "ts-node src/index.ts"
@@ -23,5 +24,9 @@
   },
   "bin": {
     "gobii-cli": "./dist/index.js"
-  }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ]
 }
