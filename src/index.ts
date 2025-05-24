@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { Command, Argument } from 'commander';
 import { getAgentTasks, listAgents, deleteAgent, promptAgent } from './services/agentService';
 import { Config } from './config';
