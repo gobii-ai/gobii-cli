@@ -4,28 +4,27 @@ import { logError } from '../util/logger';
 import { fetchJson, fetchSuccess, postJson } from './api';
 
 export async function listAgents() {
-    try {
-        const agents = await fetchJson('agents/browser-use', Config.apiKey);
+  try {
+    const agents = await fetchJson('agents/browser-use', Config.apiKey);
 
-        return agents.results;
-    } catch (error) {
-        logError('Error listing agents');
-        setExitCode(1);
-        return 
-    }
-
+    return agents.results;
+  } catch (error) {
+    logError('Error listing agents');
+    setExitCode(1);
+    return
+  }
 }
 
 export async function getAgentTasks(agentId: string) {
-    try {
-        const tasks = await fetchJson(`agents/browser-use/${agentId}/tasks`, Config.apiKey);
+  try {
+    const tasks = await fetchJson(`agents/browser-use/${agentId}/tasks`, Config.apiKey);
 
-        return tasks.results;
-    } catch (error) {
-        logError('Error getting agent tasks');
-        setExitCode(1);
-        return [];
-    }
+    return tasks.results;
+  } catch (error) {
+    logError('Error getting agent tasks');
+    setExitCode(1);
+    return [];
+  }
 }
 
 export async function deleteAgent(agentId: string) {
@@ -41,9 +40,9 @@ export async function deleteAgent(agentId: string) {
  */
 export async function promptAgent(prompt: string, wait: number = 600) {
   return await postJson(`tasks/browser-use/`, Config.apiKey, {
-    body: JSON.stringify({ 
-        prompt: prompt,
-        wait: wait
-     }),
+    body: JSON.stringify({
+      prompt: prompt,
+      wait: wait
+    }),
   });
 }
