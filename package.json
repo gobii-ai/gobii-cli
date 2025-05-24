@@ -9,7 +9,6 @@
     "dev": "ts-node src/index.ts",
     "postbuild": "chmod +x dist/index.js"
   },
-  "keywords": [],
   "author": "Will Bonde",
   "license": "Apache-2.0",
   "description": "",
@@ -31,5 +30,18 @@
     "dist",
     "README.md",
     "LICENSE"
-  ]
+  ],
+  "homepage": "https://github.com/willbonde/gobii-cli",
+  "keywords": [
+    "gobii",
+    "cli",
+    "browser",
+    "automation",
+    "ai",
+    "api"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/willbonde/gobii-cli.git"
+  }
 }
