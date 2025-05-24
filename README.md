@@ -17,7 +17,8 @@ gobii-cli [options] [command]
 ### 🔧 Options
 
 - `-a, --api-key <key>` – API key for authentication
-- `-v, --verbose` – Enable verbose logging
+- `-f, --format` - Output format. Currently only supports text or json. Default is text. In JSON mode, --silent is implied. Great for piping to `jq`, etc!
+- `-v, --verbose` – Enable verbose logging. Not recommended in JSON mode, as you may break valid JSON formatting.
 - `-s, --silent` - Silence output except for results. Note: verbose takes precendence
 - `-V, --version` – Output the CLI version
 - `-h, --help` – Display help for command
