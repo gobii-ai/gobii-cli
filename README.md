@@ -6,6 +6,8 @@ This is very early in development and *will* have bugs.
 
 You must have a Gobii API key. You may either define an environment variable $GOBII_API_KEY, or specifiy it as a command line argument (see below). Argument takes precedene over environment variable.
 
+`gobii-cli` using exit codes `> 0` in compliance with POSIX to enable detection of success or failure. This is handy for automated use scenarios. 
+
 ## 🚀 Usage
 
 ```bash
@@ -16,6 +18,7 @@ gobii-cli [options] [command]
 
 - `-a, --api-key <key>` – API key for authentication
 - `-v, --verbose` – Enable verbose logging
+- `-s, --silent` - Silence output except for results. Note: verbose takes precendence
 - `-V, --version` – Output the CLI version
 - `-h, --help` – Display help for command
 
