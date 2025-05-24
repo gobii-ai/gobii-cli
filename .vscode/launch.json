@@ -5,11 +5,11 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Debug CLI",
+      "name": "Agent List (Verbose)",
       "type": "node",
       "request": "launch",
       "program": "${workspaceFolder}/src/index.ts",
-      "args": ["agents", "list", "--api-key", "${env:GOBII_API_KEY}"],
+      "args": ["agents", "list", "--api-key", "${env:GOBII_API_KEY}", "--verbose"],
       "cwd": "${workspaceFolder}",
       "runtimeArgs": ["-r", "ts-node/register"],
       "env": {
@@ -17,6 +17,46 @@
       },
       "skipFiles": ["<node_internals>/**"],
       "console": "integratedTerminal"
+    },
+    {
+      "name": "Agent Tasks (Verbose)",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/index.ts",
+      "args": ["agent", "tasks", "a9726427-b099-4481-b266-3e7c36c0a4e2", "--api-key", "${env:GOBII_API_KEY}", "--verbose"],
+      "cwd": "${workspaceFolder}",
+      "runtimeArgs": ["-r", "ts-node/register"],
+      "console": "integratedTerminal",
+    },
+    {
+      "name": "Agent Delete (Verbose)",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/index.ts",
+      "args": ["agent", "delete", "a9726427-b099-4481-b266-3e7c36c0a4e2", "--api-key", "${env:GOBII_API_KEY}", "--verbose"],
+      "cwd": "${workspaceFolder}",
+      "runtimeArgs": ["-r", "ts-node/register"],
+      "console": "integratedTerminal",
+    },
+    {
+      "name": "Prompt Agent Weather (Verbose)",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/index.ts",
+      "args": ["prompt", "What is the weather in Washington, DC?", "--api-key", "${env:GOBII_API_KEY}", "--verbose"],
+      "cwd": "${workspaceFolder}",
+      "runtimeArgs": ["-r", "ts-node/register"],
+      "console": "integratedTerminal",
+    },
+    {
+      "name": "Prompt Agent Weather (Silent)",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/index.ts",
+      "args": ["prompt", "What is the weather in Washington, DC?", "--api-key", "${env:GOBII_API_KEY}", "--silent"],
+      "cwd": "${workspaceFolder}",
+      "runtimeArgs": ["-r", "ts-node/register"],
+      "console": "integratedTerminal",
     }
   ]
 }
