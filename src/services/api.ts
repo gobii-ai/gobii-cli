@@ -11,26 +11,37 @@ export async function debugFetch(
 
   if (options.body) {
     logVerbose('Body:', typeof options.body === 'string' ? options.body : '[non-string body]');
+  } else {
+    logVerbose('No body');
   }
 
-  const response = await fetch(url, options);
+  let response;
 
-  logVerbose('Status:', response.status, response.statusText);
-  logVerbose('Response Headers:');
-  response.headers.forEach((value: string, key: string) => {
-    logVerbose(`  ${key}: ${value}`);
-  });
+  try {
+    logVerbose('Fetching...');
+    response = await fetch(url, options);
 
-  const contentType = response.headers.get('content-type') || '';
+    logVerbose('Status:', response.status, response.statusText);
+    logVerbose('Response Headers:');
 
-  let body;
+    response.headers.forEach((value: string, key: string) => {
+      logVerbose(`  ${key}: ${value}`);
+    });
 
-  if (contentType.includes('application/json')) {
-    body = await response.clone().json();
-    logVerbose('Response JSON:', body);
-  } else {
-    body = await response.clone().text();
-    logVerbose('Response Text:', body);
+    const contentType = response.headers.get('content-type') || '';
+
+    let body;
+
+    if (contentType.includes('application/json')) {
+      body = await response.clone().json();
+      logVerbose('Response JSON:', body);
+    } else {
+      body = await response.clone().text();
+      logVerbose('Response Text:', body);
+    }
+  } catch (error) {
+    logError('Error fetching: ', url);
+    logError(error);
   }
 
   logVerbose('--- END FETCH DEBUG ---');
@@ -56,7 +67,11 @@ async function baseFetch(
 
     logVerbose('Fetching: ', url);
 
-    const response = await fetch(url, {
+    if (!options.method) {
+      options.method = 'GET';
+    }
+
+    const response = await debugFetch(url, {
       ...options,
       headers: {
         'X-Api-Key': apiKey,
@@ -67,6 +82,8 @@ async function baseFetch(
   
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+    } else {
+      logVerbose('Response OK');
     }
   
     return response;
@@ -87,24 +104,25 @@ async function basePost(
   options: RequestInit = {}
 ): Promise<any> {
   const url = `https://getgobii.com/api/v1/${endpoint}`
-    const response = await debugFetch(url, {
-      ...options,
-      method: 'POST',
-      headers: {
-        'X-Api-Key': apiKey,
-        'Content-Type': 'application/json',
-        ...(options.headers || {}),
-      },
-      body: options.body,
-    });
-  
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${await response.text()}`);
-    }
 
-    console.log('Response: ', JSON.stringify(response, null, 2));
-  
-    return response;
+  const response = await debugFetch(url, {
+    ...options,
+    method: 'POST',
+    headers: {
+      'X-Api-Key': apiKey,
+      'Content-Type': 'application/json',
+      ...(options.headers || {}),
+    },
+    body: options.body,
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+  }
+
+  logVerbose('Response: ', JSON.stringify(response, null, 2));
+
+  return response;
 }
 
 

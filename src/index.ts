@@ -15,26 +15,59 @@ const createAgentsCommand = (): Command => {
     agents
         .command('list')
         .description('List all agents')
-        .action(() => {
-            listAgents().then(agents => {
-                //Transform the agents (array of objects) into an array of arrays
-                const agentsTable = agents.map((agent: any) => [agent.id, agent.name, agent.created_at]);
+        .action(async () => {
+          try {
+            const agents = await listAgents();
+        
+            if (!agents || agents.length === 0) {
+              logResult('No agents found.');
+              return;
+            }
+        
+            const agentsTable = agents.map((agent: any) => [
+              agent.id,
+              agent.name,
+              agent.created_at,
+            ]);
+        
+            agentsTable.unshift(['ID', 'Name', 'Created At']);
+        
+            logResult(table(agentsTable, {
+              columns: {
+                0: { alignment: 'left' },
+                1: { alignment: 'left' },
+                2: { alignment: 'left' },
+              },
+            }));
+          } catch (err) {
+            logError('Failed to get agents');
+            setExitCode(1);
+          }
+        }//() => {
 
-                //Push the headers to the first row
-                agentsTable.unshift(['ID', 'Name', 'Created At']);
 
-                logResult(table(agentsTable, {
-                    columns: {
-                        0: { alignment: 'left' },
-                        1: { alignment: 'left' },
-                        2: { alignment: 'left' },
-                    }
-                }));
-            }).catch(error => {
-              logError("Failed to get agents");
-              setExitCode(1);
-            });
-        });
+
+            // listAgents().then(agents => {
+            //     //Transform the agents (array of objects) into an array of arrays
+            //     const agentsTable = agents.map((agent: any) => [agent.id, agent.name, agent.created_at]);
+
+            //     //Push the headers to the first row
+            //     agentsTable.unshift(['ID', 'Name', 'Created At']);
+
+            //     logResult(table(agentsTable, {
+            //         columns: {
+            //             0: { alignment: 'left' },
+            //             1: { alignment: 'left' },
+            //             2: { alignment: 'left' },
+            //         }
+            //     }));
+            // }).catch(error => {
+            //   logError("Failed to get agents");
+            //   setExitCode(1);
+            // });
+        //}
+      
+      );
 
     return agents;
 }
@@ -163,13 +196,22 @@ program.hook('preAction', (thisCommand) => {
   const opts = thisCommand.opts();
   setLoggingOptions({ verbose: opts.verbose, silent: opts.silent });
 });
+
+
+process.on('unhandledRejection', (reason) => {
+  logError('💥 Unhandled Rejection:', reason);
+  process.exit(1);
+});
   
-program
-  .parseAsync(process.argv)
-  .then(() => {
-    process.exit(getExitCode());
-  })
-  .catch(error => {
-    logError(error);
+async function main() {
+  try {
+    await program.parseAsync(process.argv);
+  } catch (err) {
+    logError('Fatal CLI error:', err);
     setExitCode(1);
-  });
+  } finally {
+    process.exit(getExitCode());
+  }
+}
+
+main();
