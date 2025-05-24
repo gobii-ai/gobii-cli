@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { setExitCode, getExitCode, __resetExitCodeForTests } from '../../../src/util/exit';
+import { setExitCode, getExitCode, resetExitCodeForTests } from '../../../src/util/exit';
 
 describe('exit.ts', () => {
   // Reset the internal state before each test (bypassing module encapsulation)
@@ -7,7 +7,7 @@ describe('exit.ts', () => {
     // Vitest doesn't allow resetting internal module state directly,
     // but we can re-import the module to simulate it if needed.
     // For now, this is a workaround using setExitCode(0) — or you can refactor.
-    __resetExitCodeForTests()
+    resetExitCodeForTests()
   });
 
   it('should start with an exit code of 0', () => {
