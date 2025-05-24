@@ -98,7 +98,7 @@ gobii-cli agent tasks abc123 --verbose
 ## 🧪 Example
 
 ```bash
-gobii-cli prompt "Summarize my last 10 tasks" --api-key abc123 --verbose
+gobii-cli prompt "What was the weather like in Washington, DC on June 16, 2024?" --api-key abc123 --verbose
 ```
 
 ---
