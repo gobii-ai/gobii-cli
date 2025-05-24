@@ -43,127 +43,115 @@ const createAgentsCommand = (): Command => {
             logError('Failed to get agents');
             setExitCode(1);
           }
-        }//() => {
-
-
-
-            // listAgents().then(agents => {
-            //     //Transform the agents (array of objects) into an array of arrays
-            //     const agentsTable = agents.map((agent: any) => [agent.id, agent.name, agent.created_at]);
-
-            //     //Push the headers to the first row
-            //     agentsTable.unshift(['ID', 'Name', 'Created At']);
-
-            //     logResult(table(agentsTable, {
-            //         columns: {
-            //             0: { alignment: 'left' },
-            //             1: { alignment: 'left' },
-            //             2: { alignment: 'left' },
-            //         }
-            //     }));
-            // }).catch(error => {
-            //   logError("Failed to get agents");
-            //   setExitCode(1);
-            // });
-        //}
-      
-      );
+        });
 
     return agents;
 }
 
 const createAgentCommand = (): Command => {
-    const agent = new Command('agent');
-  
-    agent
-      .command('tasks')
-      .description('Get tasks on a specific agent')
-      .argument('<agentId>', 'Agent ID')
-      .action((agentId) => {
-        getAgentTasks(agentId).then(tasks => {
-            const tasksTable = tasks.map((task: any) => [task.id, task.prompt, task.status, task.created_at, task.updated_at]);
+  const agent = new Command('agent');
 
-            tasksTable.unshift(['ID', 'Prompt', 'Status', 'Created At', 'Updated At']);
+  agent
+    .command('tasks')
+    .description('Get tasks on a specific agent')
+    .argument('<agentId>', 'Agent ID')
+    .action(async (agentId: string) => {
+      try {
+        const tasks = await getAgentTasks(agentId);
 
-            logResult(table(tasksTable, {
-                columns: {
-                    0: { alignment: 'left' },
-                    1: { alignment: 'left', wrapWord: true },
-                    2: { alignment: 'left' },
-                    3: { alignment: 'left' },
-                    4: { alignment: 'left' },
-                }
-            }));
+        if (!tasks || tasks.length === 0) {
+          log('No tasks found for this agent.');
+          return;
+        }
 
-            log("Total tasks: ", tasks.length);
-        }).catch(error => {
-          logError("Failed to get tasks");
+        const tasksTable = tasks.map((task: any) => [
+          task.id,
+          task.prompt,
+          task.status,
+          task.created_at,
+          task.updated_at,
+        ]);
+
+        tasksTable.unshift(['ID', 'Prompt', 'Status', 'Created At', 'Updated At']);
+
+        logResult(table(tasksTable, {
+          columns: {
+            0: { alignment: 'left' },
+            1: { alignment: 'left', wrapWord: true },
+            2: { alignment: 'left' },
+            3: { alignment: 'left' },
+            4: { alignment: 'left' },
+          },
+        }));
+
+        log(`Total tasks: ${tasks.length}`);
+      } catch (err) {
+        logError('Failed to get tasks');
+        logError(err);
+        setExitCode(1);
+      }
+    });
+
+  agent
+    .command('delete')
+    .description('Delete a specific agent')
+    .argument('<agentId>', 'Agent ID')
+    .action(async (agentId: string) => {
+      try {
+        const delAgent = await deleteAgent(agentId);
+
+        if (delAgent) {
+          log('Agent deleted successfully');
+        } else {
+          logError('Failed to delete agent');
           setExitCode(1);
-        });
-      });
-  
-    agent
-      .command('delete')
-      .description('Delete a specific agent')
-      .argument('<agentId>', 'Agent ID')
-      .action((agentId) => {
-        deleteAgent(agentId).then(delAgent => {
-            if (delAgent) {
-              log('Agent deleted successfully');
-            } else {
-              logError('Failed to delete agent');
-              setExitCode(1);
-            }
-        });
-      });
-  
-    return agent;
-  }
+        }
+      } catch (err) {
+        logError('Error deleting agent');
+        logError(err);
+        setExitCode(1);
+      }
+    });
+
+  return agent;
+};
 
 const createPromptCommand = (): Command => {
   const prompt = new Command('prompt')
-  .argument('<text>', 'Prompt text to create a new task')
-  .description("Create a new task with a provided prompt")
-  .action(async (text) => {
-    const spinner = ora({
-      text: 'Executing prompt, this may take a while...',
-      spinner: randomSpinner(), // Custom spinner animation
-    })
-    
-    if (!isSilent()) {
-      spinner.start();
-    }
+    .argument('<text>', 'Prompt text to create a new task')
+    .description('Create a new task with a provided prompt')
+    .action(async (text: string) => {
+      const spinner = ora({
+        text: 'Executing prompt, this may take a while...',
+        spinner: randomSpinner(),
+      });
 
-    try {
-      promptAgent(text, 600)
-        .then(result => {
-          if (!isSilent()) {
-            spinner.succeed('Prompt completed successfully!');
-          }
-
-          log("Result:");
-          logResult(result.result);
-        })
-        .catch(error => {
-          if (!isSilent()) {
-            spinner.fail('Failed to execute prompt');
-          }
-
-          logError(error);
-          setExitCode(1);
-        });
-    } catch (error) {
       if (!isSilent()) {
-        spinner.fail('Failed to send prompt');
+        spinner.start();
       }
 
-      logError(error);
-      setExitCode(1);
-    }
-  });
+      try {
+        const result = await promptAgent(text, 600);
+
+        if (!isSilent()) {
+          spinner.succeed('Prompt completed successfully!');
+        }
+
+        log('Result:');
+        logResult(result.result);
+      } catch (error) {
+        if (!isSilent()) {
+          spinner.fail('Failed to execute prompt');
+        }
+
+        logError('Error executing prompt:');
+        logError(error);
+        setExitCode(1);
+      }
+    });
 
   return prompt;
-}
+};
 
 const program = new Command();
 
