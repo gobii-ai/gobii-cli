@@ -18,6 +18,8 @@ import { getOutputType, GobiiCliOutputType, setOutputConfig } from './util/outpu
 const createAgentsCommand = (): Command => {
   const agents = new Command('agents');
 
+  agents.description('Manage agents');
+
   agents
     .command('list')
     .description('List all agents')
@@ -66,6 +68,8 @@ const createAgentsCommand = (): Command => {
  */
 const createAgentCommand = (): Command => {
   const agent = new Command('agent');
+
+  agent.description('Manage an individual agent');
 
   agent
     .command('tasks')
@@ -202,10 +206,9 @@ program
   .option('-s, --silent', 'Suppress all output except final result. Verbose mode takes precedence over silent mode.')
   .option('-f, --format <format>', 'Output format. Currently only supports text or json. Default is text. In JSON mode, --silent is implied.', 'text');
 
+program.addCommand(createPromptCommand());
 program.addCommand(createAgentsCommand());
 program.addCommand(createAgentCommand());
-program.addCommand(createPromptCommand());
-
 
 //Validate we have an API key
 program.hook('preAction', (thisCommand) => {
