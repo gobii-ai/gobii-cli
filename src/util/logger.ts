@@ -42,7 +42,7 @@ export function logVerbose(...args: any[]) {
  */
 export function logInfo(...args: any[]) {
   if (!silent) {
-  console.log(...args);
+    console.log(...args);
   }
 }
 
@@ -52,9 +52,7 @@ export function logInfo(...args: any[]) {
  * @param {any[]} args - The arguments to log
  */
 export function logError(...args: any[]) {
-  if (!silent) {
   console.error('[error]', ...args);
-  }
 }
 
 /**
@@ -82,4 +80,13 @@ export function isSilent() {
  */
 export function isVerbose() {
   return verbose;
+}
+
+/**
+ * Set the silent mode
+ * 
+ * @param {boolean} s - Whether to set the silent mode
+ */
+export function setSilent(s: boolean) {
+  silent = s;
 }
