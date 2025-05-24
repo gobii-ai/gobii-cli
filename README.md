@@ -1,6 +1,6 @@
 # gobii-cli
 
-A unofficial command-line interface for interacting with [Gobii](https://getgobii.com) prompts, agents and tasks.
+A unofficial command-line interface for interacting with [Gobii](https://getgobii.com) prompts, agents and tasks. Gobii is a tool for browser automation using AI that provides the ability to perform complex web tasks without an API.
 
 This is very early in development and *will* have bugs. 
 
