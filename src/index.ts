@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { Command, Argument } from 'commander';
-import { getAgentTasks, listAgents, deleteAgent, promptAgent, getAgentTask, cancelTask } from './services/agentService';
+import { getAgentTasks, listAgents, deleteAgent, promptAgent, getAgentTask, cancelTask, getTaskResult } from './services/agentService';
 import { Config } from './config';
 import { table } from 'table';
 import { randomSpinner } from 'cli-spinners';
@@ -9,6 +9,7 @@ import ora from 'ora';
 import { log, logError, logResult, setLoggingOptions, isSilent, setSilent } from './util/logger';
 import { getExitCode, resetExitCodeForTests, setExitCode } from './util/exit';
 import { getOutputType, GobiiCliOutputType, setOutputConfig } from './util/output';
+import { isJsonString } from './util/misc';
 
 /**
  * Create the agents command
@@ -198,6 +199,35 @@ const createAgentTaskCommand = (): Command => {
         }
       } catch (err) {
         logError('Failed to cancel task');
+      }
+    });
+
+  agentTask
+    .command('result')
+    .description('Get the result of a specific task')
+    .argument('<taskId>', 'Task ID')
+    .action(async (taskId: string) => {
+      try {
+        const result = await getTaskResult(taskId);
+
+        if (getOutputType() === GobiiCliOutputType.JSON) {
+          logResult(JSON.stringify(result, null, 2));
+        } else {
+          logResult('Result:');
+
+          //If the result is a valid object, print as JSON and log it
+          //Same with if it is a valid JSON string
+          //Else - print the result as a string
+          if (typeof result.result === 'object' && result.result !== null) {
+            logResult(JSON.stringify(result.result, null, 2));
+          } else if (typeof result.result === 'string' && isJsonString(result.result)) {
+            logResult(JSON.stringify(JSON.parse(result.result), null, 2));
+          } else {
+            logResult(result.result);
+          }
+        }
+      } catch (error) {
+        logError('Failed to get task result');
       }
     });
 
