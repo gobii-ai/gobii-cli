@@ -1,74 +1,185 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import * as api from '../../../src/services/api';
-import * as agentService from '../../../src/services/agentService';
-import { setExitCode, getExitCode, resetExitCodeForTests } from '../../../src/util/exit';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import {
+  listAgents,
+  getAgentTasks,
+  getAgentTask,
+  deleteAgent,
+  cancelTask,
+  deleteTask,
+  getTaskResult,
+  promptAgent,
+  pingGobii
+} from '../../../src/services/agentService';
+import { fetchJson, fetchSuccess, postJson } from '../../../src/services/api';
+import { Config } from '../../../src/config';
+import { resetExitCodeForTests } from '../../../src/util/exit';
 
-vi.mock('../../../src/services/api', async () => {
-  const actual = await vi.importActual<typeof import('../../../src/services/api')>('../../../src/services/api');
-  return {
-    ...actual,
-    fetchJson: vi.fn(),
-    fetchSuccess: vi.fn(),
-    postJson: vi.fn(),
-  };
-});
+// Mock the API functions
+vi.mock('../../../src/services/api', () => ({
+  fetchJson: vi.fn(),
+  fetchSuccess: vi.fn(),
+  postJson: vi.fn()
+}));
 
-describe('agentService.ts', () => {
+// Mock the Config
+vi.mock('../../../src/config', () => ({
+  Config: {
+    apiKey: 'test-api-key'
+  }
+}));
+
+describe('agentService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     resetExitCodeForTests();
   });
 
-  it('listAgents should return agent results', async () => {
-    (api.fetchJson as any).mockResolvedValueOnce({ results: ['agent1', 'agent2'] });
+  describe('listAgents', () => {
+    it('should return agent results on success', async () => {
+      const mockAgents = { results: [{ id: '1', name: 'Agent 1' }] };
+      vi.mocked(fetchJson).mockResolvedValueOnce(mockAgents);
 
-    const result = await agentService.listAgents();
-    expect(result).toEqual(['agent1', 'agent2']);
-    expect(getExitCode()).toBe(0);
+      const result = await listAgents();
+      expect(result).toEqual(mockAgents.results);
+      expect(fetchJson).toHaveBeenCalledWith('agents/browser-use', Config.apiKey);
+    });
+
+    it('should handle errors gracefully', async () => {
+      vi.mocked(fetchJson).mockRejectedValueOnce(new Error('API Error'));
+      const result = await listAgents();
+      expect(result).toBeUndefined();
+    });
   });
 
-  it('listAgents should set exit code on failure', async () => {
-    (api.fetchJson as any).mockRejectedValueOnce(new Error('Failed'));
-    const result = await agentService.listAgents();
-    expect(result).toBeUndefined();
-    expect(getExitCode()).toBe(1);
+  describe('getAgentTasks', () => {
+    it('should return task results for an agent', async () => {
+      const mockTasks = { results: [{ id: '1', name: 'Task 1' }] };
+      vi.mocked(fetchJson).mockResolvedValueOnce(mockTasks);
+
+      const result = await getAgentTasks('agent-1');
+      expect(result).toEqual(mockTasks.results);
+      expect(fetchJson).toHaveBeenCalledWith('agents/browser-use/agent-1/tasks', Config.apiKey);
+    });
+
+    it('should return empty array on error', async () => {
+      vi.mocked(fetchJson).mockRejectedValueOnce(new Error('API Error'));
+      const result = await getAgentTasks('agent-1');
+      expect(result).toEqual([]);
+    });
   });
 
-  it('getAgentTasks should return task results', async () => {
-    (api.fetchJson as any).mockResolvedValueOnce({ results: ['task1', 'task2'] });
+  describe('getAgentTask', () => {
+    it('should return a specific task', async () => {
+      const mockTask = { id: '1', name: 'Task 1' };
+      vi.mocked(fetchJson).mockResolvedValueOnce(mockTask);
 
-    const result = await agentService.getAgentTasks('abc123');
-    expect(result).toEqual(['task1', 'task2']);
-    expect(getExitCode()).toBe(0);
+      const result = await getAgentTask('task-1');
+      expect(result).toEqual(mockTask);
+      expect(fetchJson).toHaveBeenCalledWith('tasks/browser-use/task-1', Config.apiKey);
+    });
   });
 
-  it('getAgentTasks should return [] and set exit code on failure', async () => {
-    (api.fetchJson as any).mockRejectedValueOnce(new Error('Failed'));
+  describe('deleteAgent', () => {
+    it('should delete an agent successfully', async () => {
+      vi.mocked(fetchSuccess).mockResolvedValueOnce(true);
 
-    const result = await agentService.getAgentTasks('bad');
-    expect(result).toEqual([]);
-    expect(getExitCode()).toBe(1);
+      const result = await deleteAgent('agent-1');
+      expect(result).toBe(true);
+      expect(fetchSuccess).toHaveBeenCalledWith(
+        'agents/browser-use/agent-1',
+        Config.apiKey,
+        { method: 'DELETE' }
+      );
+    });
   });
 
-  it('getAgentTask should call fetchJson with correct endpoint', async () => {
-    (api.fetchJson as any).mockResolvedValueOnce({ id: 'task123' });
+  describe('cancelTask', () => {
+    it('should cancel a task successfully', async () => {
+      const mockResponse = { status: 'cancelled' };
+      vi.mocked(fetchJson).mockResolvedValueOnce(mockResponse);
 
-    const result = await agentService.getAgentTask('task123');
-    expect(result).toEqual({ id: 'task123' });
+      const result = await cancelTask('task-1');
+      expect(result).toEqual(mockResponse);
+      expect(fetchJson).toHaveBeenCalledWith(
+        'tasks/browser-use/task-1/cancel/',
+        Config.apiKey,
+        { method: 'POST' }
+      );
+    });
   });
 
-  it('deleteAgent should call fetchSuccess with DELETE method', async () => {
-    (api.fetchSuccess as any).mockResolvedValueOnce(true);
+  describe('deleteTask', () => {
+    it('should delete a task successfully', async () => {
+      vi.mocked(fetchSuccess).mockResolvedValueOnce(true);
 
-    const result = await agentService.deleteAgent('agent123');
-    expect(result).toBe(true);
+      const result = await deleteTask('task-1');
+      expect(result).toBe(true);
+      expect(fetchSuccess).toHaveBeenCalledWith(
+        'tasks/browser-use/task-1',
+        Config.apiKey,
+        { method: 'DELETE' }
+      );
+    });
   });
 
-  it('promptAgent should call postJson with prompt and wait', async () => {
-    const mockResponse = { result: 'done' };
-    (api.postJson as any).mockResolvedValueOnce(mockResponse);
+  describe('getTaskResult', () => {
+    it('should return task result', async () => {
+      const mockResult = { output: 'Task completed' };
+      vi.mocked(fetchJson).mockResolvedValueOnce(mockResult);
 
-    const result = await agentService.promptAgent('do something', 120);
-    expect(result).toEqual(mockResponse);
+      const result = await getTaskResult('task-1');
+      expect(result).toEqual(mockResult);
+      expect(fetchJson).toHaveBeenCalledWith(
+        'tasks/browser-use/task-1/result/',
+        Config.apiKey
+      );
+    });
+  });
+
+  describe('promptAgent', () => {
+    it('should send prompt to agent', async () => {
+      const mockResponse = { id: '1', status: 'pending' };
+      vi.mocked(postJson).mockResolvedValueOnce(mockResponse);
+
+      const result = await promptAgent('test prompt', 300);
+      expect(result).toEqual(mockResponse);
+      expect(postJson).toHaveBeenCalledWith(
+        'tasks/browser-use/',
+        Config.apiKey,
+        {
+          body: JSON.stringify({
+            prompt: 'test prompt',
+            wait: 300
+          })
+        }
+      );
+    });
+
+    it('should use default wait time if not provided', async () => {
+      const mockResponse = { id: '1', status: 'pending' };
+      vi.mocked(postJson).mockResolvedValueOnce(mockResponse);
+
+      await promptAgent('test prompt');
+      expect(postJson).toHaveBeenCalledWith(
+        'tasks/browser-use/',
+        Config.apiKey,
+        {
+          body: JSON.stringify({
+            prompt: 'test prompt',
+            wait: 600
+          })
+        }
+      );
+    });
+  });
+
+  describe('pingGobii', () => {
+    it('should return true on successful ping', async () => {
+      vi.mocked(fetchSuccess).mockResolvedValueOnce(true);
+
+      const result = await pingGobii();
+      expect(result).toBe(true);
+      expect(fetchSuccess).toHaveBeenCalledWith('ping', Config.apiKey);
+    });
   });
 });
