@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { Command, Argument } from 'commander';
-import { getAgentTasks, listAgents, deleteAgent, promptAgent, getAgentTask } from './services/agentService';
+import { getAgentTasks, listAgents, deleteAgent, promptAgent, getAgentTask, cancelTask } from './services/agentService';
 import { Config } from './config';
 import { table } from 'table';
 import { randomSpinner } from 'cli-spinners';
@@ -177,6 +177,29 @@ const createAgentTaskCommand = (): Command => {
         setExitCode(1);
       }
     });
+  
+  agentTask
+    .command('cancel')
+    .description('Cancel a specific task')
+    .argument('<taskId>', 'Task ID')
+    .action(async (taskId: string) => {
+      try {
+        const delTask = await cancelTask(taskId);
+
+        if (getOutputType() === GobiiCliOutputType.JSON) {
+          logResult(JSON.stringify(delTask, null, 2));
+        } else {
+          if (delTask) {
+            log('Task deleted successfully');
+          } else {
+            logError('Failed to cancel task');
+            setExitCode(1);
+          }
+        }
+      } catch (err) {
+        logError('Failed to cancel task');
+      }
+    });
 
   return agentTask;
 };
@@ -255,7 +278,9 @@ program.hook('preAction', (thisCommand) => {
   } else if (process.env.GOBII_API_KEY) {
     Config.apiKey = process.env.GOBII_API_KEY;
   } else {
-    console.error('API Key must be set via --api-key or GOBII_API_KEY environment variable');
+    logError('API Key must be set via --api-key or GOBII_API_KEY environment variable');
+    logError(''); //New line for readability
+    logError('🚀 You can get an API key at https://gobii.ai/ 🤘');
     process.exit(1);
   }
 });
