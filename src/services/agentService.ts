@@ -59,6 +59,37 @@ export async function deleteAgent(agentId: string) {
 }
 
 /**
+ * Cancel a task
+ * 
+ * @param {string} taskId - The ID of the task
+ * @returns {Promise<any>} - The response from the agent
+ */
+export async function cancelTask(taskId: string) : Promise<any> {
+  return await fetchJson(`tasks/browser-use/${taskId}/cancel/`, Config.apiKey, { method: 'POST' });
+}
+
+/**
+ * Delete a task
+ * 
+ * @param {string} taskId - The ID of the task
+ * @returns {Promise<boolean>} - The response from the agent. 
+ */
+export async function deleteTask(taskId: string) : Promise<boolean> {
+  return await fetchSuccess(`tasks/browser-use/${taskId}`, Config.apiKey, { method: 'DELETE' });
+}
+
+
+/**
+ * Get the result of a task
+ * 
+ * @param {string} taskId - The ID of the task
+ * @returns {Promise<any>} - The response from the agent
+ */
+export async function getTaskResult(taskId: string) : Promise<any> {
+  return await fetchJson(`tasks/browser-use/${taskId}/result/`, Config.apiKey);
+}
+
+/**
  * Prompt to execute a task - all the agent and task magic happens automatically
  * 
  * @param {string} prompt - The prompt to send to the agent
