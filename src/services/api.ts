@@ -171,9 +171,9 @@ export async function postJson(endpoint: string, apiKey: string, options: Reques
  * @param apiKey - The API key to use
  * @param options - The options to pass to the fetch request
  * 
- * @returns True if the request was successful, false otherwise
+ * @returns {Promise<boolean>} True if the request was successful, false otherwise
  */
-export async function fetchSuccess(endpoint: string, apiKey: string, options: RequestInit = {}) {
+export async function fetchSuccess(endpoint: string, apiKey: string, options: RequestInit = {}) : Promise<boolean> {
   try {
     const response = await baseFetch(endpoint, apiKey, options);
 
