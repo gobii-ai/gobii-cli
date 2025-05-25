@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { Command, Argument } from 'commander';
-import { getAgentTasks, listAgents, deleteAgent, promptAgent, getAgentTask, cancelTask, getTaskResult } from './services/agentService';
+import { getAgentTasks, listAgents, deleteAgent, promptAgent, getAgentTask, cancelTask, getTaskResult, pingGobii } from './services/agentService';
 import { Config } from './config';
 import { table } from 'table';
 import { randomSpinner } from 'cli-spinners';
@@ -146,6 +146,11 @@ const createAgentCommand = (): Command => {
   return agent;
 };
 
+/**
+ * Create the task command
+ * 
+ * @returns {Command} - The command
+ */
 const createAgentTaskCommand = (): Command => {
   const agentTask = new Command('task');
 
@@ -235,6 +240,28 @@ const createAgentTaskCommand = (): Command => {
 };
 
 /**
+ * Create the ping command
+ * 
+ * @returns {Command} - The command
+ */
+const createPingCommand = (): Command => {
+  const ping = new Command('ping');
+  ping.description('Ping the Gobii API');
+  ping.action(async () => {
+    const result = await pingGobii();
+
+    if (getOutputType() === GobiiCliOutputType.JSON) {
+      logResult(result)
+    } else {
+      logResult(result ? 'Pong! 🤘' : 'Failed to ping Gobii');
+    }
+
+  });
+
+  return ping;
+}
+
+/**
  * Create the prompt command
  * 
  * @returns {Command} - The command
@@ -299,6 +326,7 @@ program.addCommand(createPromptCommand());
 program.addCommand(createAgentsCommand());
 program.addCommand(createAgentCommand());
 program.addCommand(createAgentTaskCommand());
+program.addCommand(createPingCommand());
 
 //Validate we have an API key
 program.hook('preAction', (thisCommand) => {

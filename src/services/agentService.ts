@@ -104,3 +104,12 @@ export async function promptAgent(prompt: string, wait: number = 600) {
     }),
   });
 }
+
+/**
+ * Ping the Gobii API
+ * 
+ * @returns {Promise<boolean>} - True if the ping was successful, false otherwise
+ */
+export async function pingGobii() {
+  return await fetchSuccess('ping', Config.apiKey);
+}

@@ -71,4 +71,18 @@ describe('gobii-cli (integration)', () => {
 
     expect(exitCode).toBeLessThanOrEqual(1);
   });
+
+  it('should return pong or JSON from ping command', async () => {
+    const { stdout, exitCode } = await execa('node', [
+      CLI,
+      'ping',
+      '--api-key',
+      'fake',
+      '--format',
+      'json',
+    ], { reject: false });
+
+    expect(exitCode).toBeLessThanOrEqual(1);
+    expect(() => JSON.parse(stdout)).not.toThrow();
+  });
 });
