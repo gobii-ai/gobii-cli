@@ -41,12 +41,12 @@ gobii-cli prompt "Generate daily summary"
 
 **Options:**
 
-- `-j, --schema <schema>` – Output schema for the prompt (JSON Schema string). Used to validate the prompt’s output structure. Example:
+- `-j, --schema <schema>` – Output schema for the prompt (JSON Schema string). Used to define the prompt’s output structure. NOTE: Use with --format=json. Example:
   ```bash
   --schema '{"type": "object", "properties": {"name": {"type": "string"}, "age": {"type": "number"}}}'
   ```
 
-- `-f, --schema-file <file>` – Path to a file containing a JSON Schema used to validate output. Example:
+- `-f, --schema-file <file>` – Path to a file containing a JSON Schema used to define output. NOTE: Use with --format=json. Example:
   ```bash
   --schema-file ./schema.json
   ```
