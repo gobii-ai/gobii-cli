@@ -8,6 +8,8 @@ You must have a Gobii API key. You may either define an environment variable `$G
 
 `gobii-cli` uses POSIX-compliant exit codes (`0` for success, `> 0` for failure), making it suitable for scripting and automation.
 
+I highly recommend using the `prompt` command combined with JSON format to pipe data to `jq` or other tools.
+
 ---
 
 ## 🚀 Usage
@@ -36,6 +38,22 @@ Submit a prompt to the Gobii API and wait for a result.
 ```bash
 gobii-cli prompt "Generate daily summary"
 ```
+
+**Options:**
+
+- `-j, --schema <schema>` – Output schema for the prompt (JSON Schema string). Used to validate the prompt’s output structure. Example:
+  ```bash
+  --schema '{"type": "object", "properties": {"name": {"type": "string"}, "age": {"type": "number"}}}'
+  ```
+
+- `-f, --schema-file <file>` – Path to a file containing a JSON Schema used to validate output. Example:
+  ```bash
+  --schema-file ./schema.json
+  ```
+
+  > Note: If both `--schema` and `--schema-file` are provided, `--schema` takes precedence.
+
+- `-w, --wait <seconds>` – Time in seconds to wait for the result. Default is `900`. Must be `1–900`.
 
 ---
 
@@ -66,7 +84,7 @@ gobii-cli agents list
 List tasks associated with a specific agent.
 
 ```bash
-gobii-cli agent tasks <agentId>
+gobii-cli agent tasks abc123
 ```
 
 ---
@@ -76,7 +94,7 @@ gobii-cli agent tasks <agentId>
 Delete a specific agent.
 
 ```bash
-gobii-cli agent delete <agentId>
+gobii-cli agent delete abc123
 ```
 
 ---
@@ -86,7 +104,7 @@ gobii-cli agent delete <agentId>
 Retrieve metadata for a specific task.
 
 ```bash
-gobii-cli task get <taskId>
+gobii-cli task get task-xyz
 ```
 
 ---
@@ -96,7 +114,7 @@ gobii-cli task get <taskId>
 Cancel a specific task.
 
 ```bash
-gobii-cli task cancel <taskId>
+gobii-cli task cancel task-xyz
 ```
 
 ---
@@ -106,7 +124,7 @@ gobii-cli task cancel <taskId>
 Fetch the result of a completed task.
 
 ```bash
-gobii-cli task result <taskId>
+gobii-cli task result task-xyz
 ```
 
 ---
@@ -145,6 +163,39 @@ Use with caution in `--format json` mode, as it may break structured output.
 
 ```bash
 gobii-cli prompt "What was the weather like in Washington, DC on June 16, 2024?" --api-key abc123 --format json
+```
+
+```bash
+gobii-cli prompt "Get the the square footage and property age for 2343 Valley View Terrace, Driftshore Bay, DE from Zillow" --format=json --schema='{"type": "object", "properties": {"squareFootage": {"type": "number"}, "propertyAge": {"type": "number"}}, "required":  [], "additionalProperties": false}'
+
+
+{
+  "id": "0beb69b7-ac2a-42b1-8fae-1c7d457fc7c6",
+  "agent_id": null,
+  "result": {
+    "propertyAge": 36,
+    "squareFootage": 2858
+  },
+  "status": "completed",
+  "agent": null,
+  "prompt": "Get the the square footage and property age for 2343 Valley View Terrace, Driftshore Bay, DE from Zillow",
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "squareFootage": {
+        "type": "number"
+      },
+      "propertyAge": {
+        "type": "number"
+      }
+    },
+    "required": [],
+    "additionalProperties": false
+  },
+  "created_at": "2025-05-25T16:07:39.876836Z",
+  "updated_at": "2025-05-25T16:07:39.876854Z",
+  "error_message": null
+}
 ```
 
 ---

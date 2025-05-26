@@ -10,6 +10,7 @@ import { log, logError, logResult, setLoggingOptions, isSilent, setSilent } from
 import { getExitCode, resetExitCodeForTests, setExitCode } from './util/exit';
 import { getOutputType, GobiiCliOutputType, setOutputConfig } from './util/output';
 import { isJsonString } from './util/misc';
+import fs from 'fs';
 
 /**
  * Create the agents command
@@ -269,10 +270,36 @@ const createPingCommand = (): Command => {
 const createPromptCommand = (): Command => {
   const prompt = new Command('prompt')
     .argument('<text>', 'Prompt text to create a new task')
+    .option('-j, --schema <schema>', 'Output schema for the prompt. This is a JSON Schema (https://json-schema.org/) that will be used to validate the output of the prompt. If not provided, the output will be a string. Example: --schema \'{"type": "object", "properties": {"name": {"type": "string"}, "age": {"type": "number"}}}\'')
+    .option('-f, --schema-file <schemaFile>', 'Output schema for the prompt, provided as a file. This is a JSON Schema (https://json-schema.org/) that will be used to validate the output of the prompt. If not provided, the output will be a string. Example: --schema-file=schema.json. If both --schema and --schema-file are provided, --schema will take precedence.')
+    .option('-w, --wait <wait>', 'Wait time in seconds for the prompt. Default is 900 seconds. Must be a positive number <= 900', '900')
     .description('Create a new task with a provided prompt')
     .action(async (text: string) => {
 
       let spinner: any;
+
+      const opts = prompt.opts();
+      let schema = null;
+      const wait = opts.wait;
+
+      // Parse schema if it is provided
+      if (opts.schema) {
+        try {
+          schema = JSON.parse(opts.schema);
+        } catch (error) {
+          logError('Invalid schema');
+          setExitCode(1);
+          return
+        }
+      } else if (opts.schemaFile) {
+        try {
+          schema = JSON.parse(fs.readFileSync(opts.schemaFile, 'utf8'));
+        } catch (error) {
+          logError('Invalid schema file');
+          setExitCode(1);
+          return
+        }
+      }
 
       if (getOutputType() === GobiiCliOutputType.TEXT) {
         if (!isSilent()) {
@@ -286,7 +313,7 @@ const createPromptCommand = (): Command => {
       }
 
       try {
-        const result = await promptAgent(text, 900);
+        const result = await promptAgent(text, wait, schema);
 
         if (getOutputType() === GobiiCliOutputType.JSON) {
           logResult(JSON.stringify(result, null, 2));
@@ -363,6 +390,15 @@ program.hook('preAction', (thisCommand) => {
 
   if (isJson) {
     setSilent(true);
+  }
+
+  //Validate wait is a number, if it is provided
+  if (thisCommand.opts().wait) {
+    const wait = thisCommand.opts().wait;
+    if (isNaN(wait) || wait > 900 || wait < 0) {
+      logError('Wait must be a positive number <= 900, if provided');
+      process.exit(1);
+    }
   }
 });
 

@@ -96,12 +96,22 @@ export async function getTaskResult(taskId: string) : Promise<any> {
  * @param {number} wait - The number of seconds to wait for the agent to complete the task
  * @returns {Promise<any>} - The response from the agent
  */
-export async function promptAgent(prompt: string, wait: number = 600) {
+export async function promptAgent(prompt: string, wait: number = 600, schema: object|null = null) {
+
+  var body : any = {
+    prompt: prompt,
+    wait: wait
+  }
+
+  if (schema) {
+    body = {
+      ...body,
+      output_schema: schema
+    }
+  }
+
   return await postJson(`tasks/browser-use/`, Config.apiKey, {
-    body: JSON.stringify({
-      prompt: prompt,
-      wait: wait
-    }),
+    body: JSON.stringify(body),
   });
 }
 
