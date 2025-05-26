@@ -342,7 +342,7 @@ const createPromptCommand = (): Command => {
 const program = new Command();
 
 program
-  .version('1.2.0')
+  .version('1.4.0')
   .name('gobii-cli')
   .option('-a, --api-key <apiKey>', 'API key')
   .option('-v, --verbose', 'Enable verbose logging. Not recommended when used with JSON output, as it will break JSON validation.')
