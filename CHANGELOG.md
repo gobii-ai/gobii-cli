@@ -1,5 +1,13 @@
 # gobii-cli
 
+## 1.4.0
+
+### Minor Changes
+
+- Added support for --schema to define output schema
+- Added support for --schema-file to allow output schema definitions to be done in a file; more readable than doing it directly on command line
+- Support for --wait specification on command line
+
 ## 1.3.0
 
 ### Minor Changes
