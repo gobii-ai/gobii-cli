@@ -13,7 +13,7 @@ describe('gobii-cli (integration)', () => {
   it('should display help text', async () => {
     const { stdout } = await execa('node', [CLI, '--help']);
     expect(stdout).toMatch(/Usage: gobii-cli/);
-    expect(stdout).toMatch(/prompt <text>/);
+    expect(stdout).toMatch(/\[options\] \[command\]/);
   });
 
   it('should fail without an API key', async () => {

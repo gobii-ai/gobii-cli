@@ -137,39 +137,46 @@ describe('agentService', () => {
   });
 
   describe('promptAgent', () => {
-    it('should send prompt to agent', async () => {
-      const mockResponse = { id: '1', status: 'pending' };
+    it('should call postJson with prompt and wait only', async () => {
+      const mockResponse = { result: 'done' };
       vi.mocked(postJson).mockResolvedValueOnce(mockResponse);
-
-      const result = await promptAgent('test prompt', 300);
+  
+      const result = await promptAgent('do something', 120);
+  
+      expect(postJson).toHaveBeenCalledWith(
+        'tasks/browser-use/',
+        'test-api-key',
+        expect.objectContaining({
+          body: JSON.stringify({
+            prompt: 'do something',
+            wait: 120,
+          }),
+        })
+      );
+  
       expect(result).toEqual(mockResponse);
-      expect(postJson).toHaveBeenCalledWith(
-        'tasks/browser-use/',
-        Config.apiKey,
-        {
-          body: JSON.stringify({
-            prompt: 'test prompt',
-            wait: 300
-          })
-        }
-      );
     });
-
-    it('should use default wait time if not provided', async () => {
-      const mockResponse = { id: '1', status: 'pending' };
+  
+    it('should include schema if provided', async () => {
+      const mockResponse = { result: 'structured' };
+      const schema = { type: 'object', properties: { name: { type: 'string' } } };
       vi.mocked(postJson).mockResolvedValueOnce(mockResponse);
-
-      await promptAgent('test prompt');
+  
+      const result = await promptAgent('describe user', 300, schema);
+  
       expect(postJson).toHaveBeenCalledWith(
         'tasks/browser-use/',
-        Config.apiKey,
-        {
+        'test-api-key',
+        expect.objectContaining({
           body: JSON.stringify({
-            prompt: 'test prompt',
-            wait: 600
-          })
-        }
+            prompt: 'describe user',
+            wait: 300,
+            output_schema: schema,
+          }),
+        })
       );
+  
+      expect(result).toEqual(mockResponse);
     });
   });
 
