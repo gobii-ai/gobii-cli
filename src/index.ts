@@ -270,8 +270,8 @@ const createPingCommand = (): Command => {
 const createPromptCommand = (): Command => {
   const prompt = new Command('prompt')
     .argument('<text>', 'Prompt text to create a new task')
-    .option('-j, --schema <schema>', 'Output schema for the prompt. This is a JSON Schema (https://json-schema.org/) that will be used to validate the output of the prompt. If not provided, the output will be a string. Example: --schema \'{"type": "object", "properties": {"name": {"type": "string"}, "age": {"type": "number"}}}\'')
-    .option('-f, --schema-file <schemaFile>', 'Output schema for the prompt, provided as a file. This is a JSON Schema (https://json-schema.org/) that will be used to validate the output of the prompt. If not provided, the output will be a string. Example: --schema-file=schema.json. If both --schema and --schema-file are provided, --schema will take precedence.')
+    .option('-j, --schema <schema>', 'Output schema for the prompt. This is a JSON Schema (https://json-schema.org/) that will be used to validate the output of the prompt. If not provided, the output will be a string. Example: --schema \'{"type": "object", "properties": {"name": {"type": "string"}, "age": {"type": "number"}}}\'. NOTE: Use with --format=json')
+    .option('-f, --schema-file <schemaFile>', 'Output schema for the prompt, provided as a file. This is a JSON Schema (https://json-schema.org/) that will be used to validate the output of the prompt. If not provided, the output will be a string. Example: --schema-file=schema.json. If both --schema and --schema-file are provided, --schema will take precedence. NOTE: Use with --format=json')
     .option('-w, --wait <wait>', 'Wait time in seconds for the prompt. Default is 900 seconds. Must be a positive number <= 900', '900')
     .description('Create a new task with a provided prompt')
     .action(async (text: string) => {
