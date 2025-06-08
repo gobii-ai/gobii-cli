@@ -86,5 +86,15 @@
       "skipFiles": ["<node_internals>/**"],
       "console": "integratedTerminal"
     },
+    {
+      "name": "Agent Task Create (Verbose)",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/index.ts",
+      "args": ["task", "create", "What is the weather in Washington, DC?", "--wait", "600", "--api-key", "${env:GOBII_API_KEY}", "--verbose"],
+      "cwd": "${workspaceFolder}",
+      "runtimeArgs": ["-r", "ts-node/register"],
+      "console": "integratedTerminal",
+    }
   ]
 }
