@@ -78,6 +78,36 @@ export async function deleteTask(taskId: string) : Promise<boolean> {
   return await fetchSuccess(`tasks/browser-use/${taskId}`, Config.apiKey, { method: 'DELETE' });
 }
 
+/**
+ * Create a task
+ * 
+ * @param {string} prompt - The prompt to send to the agent
+ * @param {number|null} wait - The number of seconds to wait for the agent to complete the task
+ * @returns {Promise<any>} - The response from the agent
+ */
+export async function createTask(prompt: string, wait: number|null = null, schema: object|null = null) {
+  var body : any = {
+    prompt: prompt
+  }
+
+  if (wait) {
+    body = {
+      ...body,
+      wait: wait
+    }
+  }
+
+  if (schema) {
+    body = {
+      ...body,
+      output_schema: schema
+    }
+  }
+
+  return await postJson(`tasks/browser-use/`, Config.apiKey, {
+    body: JSON.stringify(body),
+  });
+}
 
 /**
  * Get the result of a task
