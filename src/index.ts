@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { Command, Argument } from 'commander';
-import { getAgentTasks, listAgents, deleteAgent, promptAgent, getAgentTask, cancelTask, getTaskResult, pingGobii } from './services/agentService';
+import { getAgentTasks, listAgents, deleteAgent, promptAgent, getAgentTask, cancelTask, getTaskResult, pingGobii, createTask } from './services/agentService';
 import { Config } from './config';
 import { table } from 'table';
 import { randomSpinner } from 'cli-spinners';
@@ -237,6 +237,55 @@ const createAgentTaskCommand = (): Command => {
       }
     });
 
+  agentTask
+    .command('create')
+    .description('Create a new task with a provided prompt')
+    .argument('<prompt>', 'Prompt to create a new task')
+    .option('-w, --wait <wait>', 'Wait time in seconds for the prompt. If not provided, task will run asynchronously. Status may be checked with `gobii-cli task get <taskId>`')
+    .option('-j, --schema <schema>', 'Output schema for the prompt. This is a JSON Schema (https://json-schema.org/) that will be used to validate the output of the prompt. If not provided, the output will be a string. Example: --schema \'{"type": "object", "properties": {"name": {"type": "string"}, "age": {"type": "number"}}}\'. NOTE: Use with --format=json')
+    .option('-f, --schema-file <schemaFile>', 'Output schema for the prompt, provided as a file. This is a JSON Schema (https://json-schema.org/) that will be used to validate the output of the prompt. If not provided, the output will be a string. Example: --schema-file=schema.json. If both --schema and --schema-file are provided, --schema will take precedence. NOTE: Use with --format=json')
+    .action(async (prompt: string) => {
+      const opts = agentTask.opts();
+      const wait = opts.wait;
+
+      let schema = null;
+
+      if (opts.schema) {
+        try {
+          schema = JSON.parse(opts.schema);
+        } catch (error) {
+          logError('Invalid schema');
+          setExitCode(1);
+          return
+        }
+      } else if (opts.schemaFile) {
+        try {
+          schema = JSON.parse(fs.readFileSync(opts.schemaFile, 'utf8'));
+        } catch (error) {
+          logError('Invalid schema file');
+          setExitCode(1);
+          return
+        }
+      }
+
+      const result = await createTask(prompt, wait, schema);
+
+      if (getOutputType() === GobiiCliOutputType.JSON) {
+        logResult(JSON.stringify(result, null, 2));
+      } else {
+        if (wait !== null) {
+          logResult('Task created successfully');
+          logResult('Task ID: ' + result.id);
+          logResult('Status may be checked with `gobii-cli task get ' + result.id + '`');
+        } else {
+          logResult('Task created: ');
+          logResult(result.id);
+          logResult('Result: ');
+          logResult(result.result);
+        }
+      }
+    });
+
   return agentTask;
 };
 
@@ -271,7 +320,7 @@ const createPromptCommand = (): Command => {
   const prompt = new Command('prompt')
     .argument('<text>', 'Prompt text to create a new task')
     .option('-j, --schema <schema>', 'Output schema for the prompt. This is a JSON Schema (https://json-schema.org/) that will be used to validate the output of the prompt. If not provided, the output will be a string. Example: --schema \'{"type": "object", "properties": {"name": {"type": "string"}, "age": {"type": "number"}}}\'. NOTE: Use with --format=json')
-    .option('-f, --schema-file <schemaFile>', 'Output schema for the prompt, provided as a file. This is a JSON Schema (https://json-schema.org/) that will be used to validate the output of the prompt. If not provided, the output will be a string. Example: --schema-file=schema.json. If both --schema and --schema-file are provided, --schema will take precedence. NOTE: Use with --format=json')
+    .option('-c, --schema-file <schemaFile>', 'Output schema for the prompt, provided as a file. This is a JSON Schema (https://json-schema.org/) that will be used to validate the output of the prompt. If not provided, the output will be a string. Example: --schema-file=schema.json. If both --schema and --schema-file are provided, --schema will take precedence. NOTE: Use with --format=json')
     .option('-w, --wait <wait>', 'Wait time in seconds for the prompt. Default is 900 seconds. Must be a positive number <= 900', '900')
     .description('Create a new task with a provided prompt')
     .action(async (text: string) => {
@@ -342,7 +391,7 @@ const createPromptCommand = (): Command => {
 const program = new Command();
 
 program
-  .version('1.4.0')
+  .version('1.5.0')
   .name('gobii-cli')
   .option('-a, --api-key <apiKey>', 'API key')
   .option('-v, --verbose', 'Enable verbose logging. Not recommended when used with JSON output, as it will break JSON validation.')
