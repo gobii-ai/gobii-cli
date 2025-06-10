@@ -1,6 +1,6 @@
 # gobii-cli
 
-An unofficial command-line interface for interacting with [Gobii](https://gobii.ai) prompts, agents, and tasks. Gobii is a tool for browser automation using AI that provides the ability to perform complex web tasks without an API.
+An ~~unofficial~~ official command-line interface for interacting with [Gobii](https://gobii.ai) prompts, agents, and tasks. Gobii is a tool for browser automation using AI that provides the ability to perform complex web tasks without an API.
 
 This is early in development and *will* have bugs.
 
@@ -216,6 +216,6 @@ npm run dev -- <command>
 This project is licensed under the [Apache License 2.0](LICENSE).  
 No warranties, express or implied.
 
-© 2025 Will Bonde
+© 2025 Gobii, Inc
 
 [![npm version](https://badge.fury.io/js/gobii-cli.svg)](https://www.npmjs.com/package/gobii-cli)
